@@ -1,10 +1,11 @@
 #include "bin/Rendering/Drawer.h"
 
+#include "WheelEntry.h"
 #include "WheelItems/WheelItem.h"
 #include "WheelItems/WheelItemFactory.h"
 #include "WheelItems/WheelItemMutable.h"
-#include "WheelEntry.h"
 #include "WheelItems/WheelItemShout.h"
+
 void WheelEntry::UpdateAnimation(RE::TESObjectREFR::InventoryItemMap& imap, float innerSpacingRad, float entryInnerAngleMin, float entryInnerAngleMax, float entryOuterAngleMin, float entryOuterAngleMax, bool hovered)
 {
 	using namespace Config::Styling::Wheel;
@@ -28,11 +29,11 @@ void WheelEntry::UpdateAnimation(RE::TESObjectREFR::InventoryItemMap& imap, floa
 }
 
 void WheelEntry::DrawBackGround(
-	const ImVec2 wheelCenter, const ImVec2 entryCenter, 
-	float innerSpacingRad, 
+	const ImVec2 wheelCenter, const ImVec2 entryCenter,
+	float innerSpacingRad,
 	float entryInnerAngleMin, float entryInnerAngleMax,
-	float entryOuterAngleMin, float entryOuterAngleMax, 
-	bool hovered, 
+	float entryOuterAngleMin, float entryOuterAngleMax,
+	bool hovered,
 	int numArcSegments, RE::TESObjectREFR::InventoryItemMap& inv, DrawArgs a_drawARGS)
 {
 	bool active = this->IsActive(inv);
@@ -82,20 +83,15 @@ void WheelEntry::DrawBackGround(
 			backgroundImageType = Texture::icon_image_type::slot_highlighted_background;
 		}
 		Texture::Image backgroundTexture = Texture::GetIconImage(backgroundImageType);
-		
-		Drawer::draw_texture(backgroundTexture.texture, entryCenter, 0, 0,
-			ImVec2(backgroundTexture.width * Config::Styling::Item::Slot::BackgroundTexture::Scale
-				, backgroundTexture.height * Config::Styling::Item::Slot::BackgroundTexture::Scale), C_SKYRIMWHITE, a_drawARGS);
-	
-	}
 
-	
+		Drawer::draw_texture(backgroundTexture.texture, entryCenter, 0, 0,
+			ImVec2(backgroundTexture.width * Config::Styling::Item::Slot::BackgroundTexture::Scale, backgroundTexture.height * Config::Styling::Item::Slot::BackgroundTexture::Scale), C_SKYRIMWHITE, a_drawARGS);
+	}
 }
 
 void WheelEntry::DrawSlotAndHighlight(ImVec2 a_wheelCenter, ImVec2 a_entryCenter, bool a_hovered, RE::TESObjectREFR::InventoryItemMap& a_imap, DrawArgs a_drawArgs)
 {
 	try {
-
 		if (a_hovered) {
 			this->drawHighlight(a_wheelCenter, a_imap, a_drawArgs);
 		}
@@ -162,6 +158,7 @@ void WheelEntry::drawSlot(ImVec2 a_center, bool a_hovered, RE::TESObjectREFR::In
 			if (auto shoutItem = std::dynamic_pointer_cast<WheelItemShout>(item)) {
 				continue;  //不要删除 shout
 			}
+
 			if (!item->IsAvailable(a_imap)) {
 				//标记删除的物品，不立即删除以防止影响遍历过程
 				_items.erase(_items.begin() + i);
@@ -263,13 +260,13 @@ void WheelEntry::ActivateItemPrimary(bool editMode)
 {
 	std::unique_lock<std::shared_mutex> lock(this->_lock);
 
-	if (!editMode) { 
+	if (!editMode) {
 		if (_items.size() == 0) {
 			return;  // nothing to do
 		}
 		_items[_selectedItem]->ActivateItemPrimary();
 		_arcRadiusBounceInterpolator.InterpolateTo(Config::Animation::EntryInputBumpScale * (Config::Styling::Wheel::OuterCircleRadius - Config::Styling::Wheel::InnerCircleRadius), Config::Animation::EntryInputBumpTime);
-	} else {// append item to after _selectedItem index
+	} else {  // append item to after _selectedItem index
 		std::shared_ptr<WheelItem> newItem = WheelItemFactory::MakeWheelItemFromMenuHovered();
 		if (newItem) {
 			_items.insert(_items.begin() + _selectedItem, newItem);
@@ -281,7 +278,7 @@ void WheelEntry::ActivateItemSpecial(bool editMode)
 {
 	std::unique_lock<std::shared_mutex> lock(this->_lock);
 	if (editMode || _items.size() == 0) {
-		return; // nothing to do
+		return;  // nothing to do
 	}
 	_items[_selectedItem]->ActivateItemSpecial();
 }
@@ -344,7 +341,6 @@ int WheelEntry::GetNumItems()
 	return this->_items.size();
 }
 
-
 WheelEntry::WheelEntry()
 {
 	_selectedItem = 0;
@@ -391,8 +387,7 @@ std::unique_ptr<WheelEntry> WheelEntry::SerializeFromJsonObj(const nlohmann::jso
 				entry->PushItem(std::move(item));
 			}
 		}
-	}
-	catch (std::exception exception) {
+	} catch (std::exception exception) {
 		logger::info("Exception serializing wheel entry: {}", exception.what());
 	}
 	int selectedItem = std::clamp(j_entry["selecteditem"].get<int>(), 0, entry->GetNumItems());
@@ -414,10 +409,8 @@ void WheelEntry::ResetAnimation()
 	this->_prevHovered = false;
 }
 
-
 void WheelEntry::SetSelectedItem(int a_selected)
 {
 	std::unique_lock<std::shared_mutex> lock(this->_lock);
 	this->_selectedItem = a_selected;
 }
-
