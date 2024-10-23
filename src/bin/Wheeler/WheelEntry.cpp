@@ -158,7 +158,6 @@ void WheelEntry::drawSlot(ImVec2 a_center, bool a_hovered, RE::TESObjectREFR::In
 			if (auto shoutItem = std::dynamic_pointer_cast<WheelItemShout>(item)) {
 				continue;  //不要删除 shout
 			}
-
 			if (!item->IsAvailable(a_imap)) {
 				//标记删除的物品，不立即删除以防止影响遍历过程
 				_items.erase(_items.begin() + i);
