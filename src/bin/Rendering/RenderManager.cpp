@@ -1,4 +1,5 @@
 #include "RenderManager.h"
+#include "FontLoader.h"
 
 #include <d3d11.h>
 
@@ -29,7 +30,6 @@ namespace stl
 		T::func = trampoline.write_call<5>(hook.address(), T::thunk);
 	}
 }
-
 
 LRESULT RenderManager::WndProcHook::thunk(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -139,6 +139,9 @@ void RenderManager::D3DInitHook::thunk()
 				} else if (languageStr == "Cyrillic") {
 					glyphRanges = ImGui::GetIO().Fonts->GetGlyphRangesCyrillic();
 					INFO("Glyph range set to Cyrillic");
+				} else if (languageStr == "Polish") {
+					glyphRanges = FontLoader::GetGlyphRangesPolish();
+					INFO("Glyph range set to Polish");
 				}
 			} else {
 				INFO("No font found for language: {}", language);
